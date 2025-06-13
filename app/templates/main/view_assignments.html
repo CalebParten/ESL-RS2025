@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Quiz Assignments</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Quiz</th>
+            <th>Student</th>
+            <th>Due</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for assignment in assignments %}
+        <tr>
+            <td>{{ assignment.quiz.title }}</td>
+            <td>{{ assignment.student.name }}</td>
+            <td>{{ assignment.due_date.date() if assignment.due_date else 'None' }}</td>
+            <td>
+                {% set attempt = assignment.quiz.attempts.filter_by(student_id=assignment.student_id).first() %}
+                {% if attempt and attempt.is_completed %}
+                    Completed
+                {% elif attempt %}
+                    In Progress
+                {% else %}
+                    Not Started
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

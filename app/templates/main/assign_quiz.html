@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Assign Quiz</h2>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label for="quiz_id" class="form-label">Select Quiz</label>
+            <select name="quiz_id" class="form-select" required>
+                <option value="">-- Choose Quiz --</option>
+                {% for quiz in quizzes %}
+                <option value="{{ quiz.id }}">{{ quiz.title }} ({{ quiz.difficulty_level }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="due_date" class="form-label">Due Date (optional)</label>
+            <input type="date" name="due_date" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Assign to Students</label>
+            <div class="form-check">
+                {% for student in students %}
+                <div>
+                    <input class="form-check-input" type="checkbox" name="students" value="{{ student.id }}" id="student_{{ student.id }}">
+                    <label class="form-check-label" for="student_{{ student.id }}">
+                        {{ student.name }} ({{ student.grade_level or "Not Set" }})
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Assign Quiz</button>
+    </form>
+</div>
+{% endblock %}

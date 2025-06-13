@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>My Quizzes</h2>
+
+    {% for quiz in quizzes %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>{{ quiz.title }}</h4>
+            <p><strong>Type:</strong> {{ quiz.quiz_type }} | <strong>Level:</strong> {{ quiz.difficulty_level }}</p>
+            <p>{{ quiz.description }}</p>
+            {% if quiz.source_image_path %}
+            <img src="{{ url_for('static', filename='uploads/quiz_images/' ~ quiz.source_image_path) }}" alt="Quiz Image" class="img-fluid mt-2">
+            {% elif quiz.source_content %}
+            <p>{{ quiz.source_content }}</p>
+            {% else %}
+            <p>No content available.</p>
+            {% endif %} 
+
+        </div>
+        <div class="card-body">
+            {% for question in quiz.questions %}
+            <div class="mb-3">
+                <strong>Q{{ loop.index }}:</strong> {{ question.question_text }}
+                <ul class="list-group mt-2">
+                    {% for option in question.options %}
+                    <li class="list-group-item {% if option.is_correct %}list-group-item-success{% endif %}">
+                        {{ option.option_text }}
+                        {% if option.is_correct %}<span class="badge bg-success">Correct</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% if question.explanation %}
+                <div class="mt-2"><em>Explanation:</em> {{ question.explanation }}</div>
+                {% endif %}
+            </div>
+            <hr>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

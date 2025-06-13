@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p>Welcome, {{ current_user.name }}! ({{ current_user.role.title() }})</p>
+
+{% if current_user.is_instructor() %}
+    <div class="card">
+        <div class="card-header">
+            <h3>Instructor Tools</h3>
+        </div>
+        <div class="card-body">
+            <p>Create and manage quizzes for your students.</p>
+            <a href="{{ url_for('main.create_quiz') }}" class="btn btn-secondary">Create New Quiz</a>
+            <a href="{{ url_for('main.assign_quiz') }}" class="btn btn-secondary">Assign Quiz</a>
+            <a href="{{ url_for('main.my_quizzes') }}" class="btn btn-secondary">View My Quizzes</a>
+            <a href="{{ url_for('main.view_assignments') }}" class="btn btn-secondary">View My Assignments</a>
+            <a href="{{ url_for('main.manage_students') }}" class="btn btn-secondary">Manage Students</a>
+        </div>
+    </div>
+{% else %}
+    <div class="card">
+        <div class="card-header">
+            <h3>Student Dashboard</h3>
+        </div>
+        <div class="card-body">
+            <p>Your English Level: <strong>{{ current_user.grade_level.title() if current_user.grade_level else "Not Set" }}</strong></p>
+            <a href="#" class="btn btn-secondary">Take Quiz</a>
+            <a href="#" class="btn btn-secondary">View History</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

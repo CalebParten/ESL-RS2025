@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Create New Quiz</h2>
+    <form method="POST" action="{{ url_for('main.generate_quiz') }}" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="title" class="form-label">Quiz Title</label>
+            <input type="text" class="form-control" name="title" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Quiz Description</label>
+            <textarea class="form-control" name="description"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Quiz Type</label>
+            <select class="form-select" name="quiz_type" required>
+                <option value="comprehension">Text Comprehension</option>
+                <option value="description">Image Description</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Difficulty Level</label>
+            <select class="form-select" name="difficulty_level" required>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Upload Text File</label>
+            <input type="file" class="form-control" name="text">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Upload Image File</label>
+            <input type="file" class="form-control" name="image">
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Quiz</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+.jumbotron {
+    background: linear-gradient(135deg, #747474 0%, #004400 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.card {
+    margin-bottom: 1rem;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.btn {
+    background-color: #004400;
+    border-color: #008800;
+
+}
+
+.btn:hover {
+    background-color: #008800;
+    border-color: #008800;
+}

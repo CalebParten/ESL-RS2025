@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Manage Students</h2>
+
+    <form method="POST" action="{{ url_for('main.manage_students') }}">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Current Level</th>
+                    <th>New Level</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.grade_level or "Not Set" }}</td>
+                    <td>
+                        <select name="level_{{ student.id }}" class="form-select">
+                            <option value="">-- Select Level --</option>
+                            <option value="beginner" {% if student.grade_level == "beginner" %}selected{% endif %}>Beginner</option>
+                            <option value="intermediate" {% if student.grade_level == "intermediate" %}selected{% endif %}>Intermediate</option>
+                            <option value="advanced" {% if student.grade_level == "advanced" %}selected{% endif %}>Advanced</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button 
+                            type="button" 
+                            class="btn btn-danger btn-sm"
+                            onclick="deleteStudent('{{ url_for('main.remove_student', user_id=student.id) }}', '{{ student.name }}')" 
+                        >Remove</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Update Levels</button>
+    </form>
+</div>
+
+<!-- Added because of some dumb nesting form thing I couldn't seem to figure out at 3am...... Easter egg??? hopefully its made of chocolate and not...... -->
+<script>
+    function deleteStudent(url, name) {
+        if (confirm(`Are you sure you want to delete ${name}?`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+
+            // CSRF token support if you use Flask-WTF
+            const csrfToken = document.querySelector('input[name="csrf_token"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken.value;
+                form.appendChild(csrfInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+{% endblock %}

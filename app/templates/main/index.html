@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Welcome to ESL Quiz Platform</h1>
+    <p class="lead">AI-powered quizzes for English language learners</p>
+    {% if current_user.is_anonymous %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">Get Started</a>
+    {% else %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('main.dashboard') }}">Go to Dashboard</a>
+    {% endif %}
+</div>
+{% endblock %}
