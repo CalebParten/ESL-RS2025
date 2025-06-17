@@ -3,6 +3,12 @@ from app.models import User, Quiz, Question, QuestionOption, QuizAttempt, Studen
 
 app = create_app()
 
+UPLOAD_FOLDER = 'static/uploads/'
+
+app.secret_key = "secret key"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
 @app.shell_context_processor
 def make_shell_context():
     return {

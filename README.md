@@ -17,9 +17,7 @@ pip install -r requirements.txt
 
 3. Initialize database:
 ```bash
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
+python init_db.py
 ```
 
 4. Run the application:

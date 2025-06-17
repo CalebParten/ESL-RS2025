@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.main import bp
+from app.main.save import saveImg
 from app.models import QuizAssignment, QuizAttempt, User, Quiz, Question, QuestionOption
 from app.main.quiz_gen_langgraph import generate_quiz_from_text, generate_quiz_from_image
 from app import db
@@ -60,24 +61,31 @@ def generate_quiz():
     if not current_user.is_instructor():
         flash('Access denied.')
         return redirect(url_for('main.dashboard'))
-
+    
     quiz_type = request.form.get('quiz_type')
     difficulty = request.form.get('difficulty_level')
     title = request.form.get('title')
     description = request.form.get('description', '')
+
+    source_content = None
+    source_image_path = None
+    source_mime = None
 
     if not title or not quiz_type or not difficulty:
         flash('Missing required fields.')
         return redirect(url_for('main.dashboard'))
 
     if 'text' in request.files and request.files['text'].filename:
-        raw_text = request.files['text'].read().decode('utf-8')
-        generated = generate_quiz_from_text(raw_text)
-        source_content = raw_text
+        source_content = request.files['text'].read().decode('utf-8')
+        generated = generate_quiz_from_text(source_content)
     elif 'image' in request.files and request.files['image'].filename:
-        image_bytes = request.files['image'].read()
+        image_file = request.files['image']
+        image_bytes = image_file.read()
+
+        source_image_path, source_mime = saveImg(image_bytes, image_file.filename)
+        
         generated = generate_quiz_from_image(image_bytes)
-        source_content = '[image]'
+
     else:
         flash('No valid input file provided.')
         return redirect(url_for('main.dashboard'))
@@ -87,8 +95,10 @@ def generate_quiz():
         description=description,
         quiz_type=quiz_type,
         source_content=source_content,
+        source_image_path=source_image_path,
         difficulty_level=difficulty,
-        creator=current_user
+        creator=current_user,
+        source_mime=source_mime
     )
     db.session.add(quiz)
     db.session.commit()

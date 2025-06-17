@@ -10,7 +10,7 @@
             <p><strong>Type:</strong> {{ quiz.quiz_type }} | <strong>Level:</strong> {{ quiz.difficulty_level }}</p>
             <p>{{ quiz.description }}</p>
             {% if quiz.source_image_path %}
-            <img src="{{ url_for('static', filename='uploads/quiz_images/' ~ quiz.source_image_path) }}" alt="Quiz Image" class="img-fluid mt-2">
+            <img src="{{ url_for('static', filename=quiz.source_image_path) }}" alt="Quiz Image" class="img-fluid mt-2">
             {% elif quiz.source_content %}
             <p>{{ quiz.source_content }}</p>
             {% else %}
