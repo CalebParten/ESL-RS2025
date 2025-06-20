@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>All Quiz Attempts</h2>
+
+    {% if attempts %}
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Quiz Title</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Completed</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in attempts %}
+            <tr>
+                <td>{{ attempt.student.name }}</td>
+                <td>{{ attempt.quiz.title }}</td>
+                <td>
+                    {% if attempt.is_completed %}
+                        {{ attempt.score }} / {{ attempt.total_questions }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ 'Completed' if attempt.is_completed else 'In Progress' }}</td>
+                <td>{{ attempt.time_completed.strftime('%Y-%m-%d %H:%M') if attempt.time_completed else '-' }}</td>
+                <td>
+                    {% if attempt.is_completed %}
+                        <a href="{{ url_for('main.review_attempt', attempt_id=attempt.id) }}" class="btn btn-sm btn-primary">Review</a>
+                    {% else %}
+                        <span class="text-muted">Not finished</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No attempts found.</p>
+    {% endif %}
+</div>
+{% endblock %}

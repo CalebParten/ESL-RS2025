@@ -15,6 +15,7 @@
             <a href="{{ url_for('main.assign_quiz') }}" class="btn btn-secondary">Assign Quiz</a>
             <a href="{{ url_for('main.my_quizzes') }}" class="btn btn-secondary">View My Quizzes</a>
             <a href="{{ url_for('main.view_assignments') }}" class="btn btn-secondary">View My Assignments</a>
+            <a href="{{ url_for('main.view_all_quiz_attempts') }}" class="btn btn-secondary">Grade Quiz Attempts</a>
             <a href="{{ url_for('main.manage_students') }}" class="btn btn-secondary">Manage Students</a>
         </div>
     </div>
@@ -25,8 +26,7 @@
         </div>
         <div class="card-body">
             <p>Your English Level: <strong>{{ current_user.grade_level.title() if current_user.grade_level else "Not Set" }}</strong></p>
-            <a href="#" class="btn btn-secondary">Take Quiz</a>
-            <a href="#" class="btn btn-secondary">View History</a>
+            <a href="{{ url_for('main.view_assigned_quizzes') }}" class="btn btn-secondary">Take Assigned Quizzes</a>
         </div>
     </div>
 {% endif %}

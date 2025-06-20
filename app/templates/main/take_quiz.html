@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ quiz.title }}</h2>
+    {% if quiz.source_image_path %}
+        <img src="{{ url_for('static', filename=quiz.source_image_path) }}" alt="Quiz Image" class="img-fluid mt-2 mb-2">
+    {% elif quiz.source_content %}
+        <p><strong>Source:</strong> {{ quiz.source_content }}</p>
+    {% else %}
+        <p>No content available.</p>
+    {% endif %}
+
+    <form method="POST">
+        {% for question in quiz.questions %}
+            <div class="mb-4">
+                <strong>Q{{ loop.index }}:</strong> {{ question.question_text }}
+                <div class="mt-2 ms-3">
+                    {% set letter_map = ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                    {% for option in question.options %}
+                        {% set letter = letter_map[loop.index0] %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                name="question_{{ question.id }}"
+                                id="q{{ question.id }}_{{ letter }}"
+                                value="{{ letter }}">
+                            <label class="form-check-label" for="q{{ question.id }}_{{ letter }}">
+                                {{ letter }}) {{ option.option_text }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-success">Submit Quiz</button>
+</form>
+
+</div>
+{% endblock %}

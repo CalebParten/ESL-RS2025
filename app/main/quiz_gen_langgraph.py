@@ -19,6 +19,7 @@ def generate_quiz_from_text(text):
     prompt = f"""
 You are a quiz generator AI. Read the following passage and generate 3 multiple-choice comprehension questions.
 Each question should have 4 options (A, B, C, D), a correct answer, and a brief explanation.
+Return only a JSON object in this exact structure:
 
 Text:
 {text}
@@ -29,7 +30,7 @@ Output format (JSON):
     {{
       "question": "...",
       "options": ["QuestionAnswer1", "QuestionAnswer2", "QuestionAnswer3", "QuestionAnswer4"],
-      "correct_answer": "A",
+      "correct_answer": "",(A,B,C....)
       "explanation": "..."
     }}
   ]
@@ -77,7 +78,7 @@ Output format (JSON):
     {{
       "question": "...",
       "options": ["QuestionAnswer1", "QuestionAnswer2", "QuestionAnswer3", "QuestionAnswer4"],
-      "correct_answer": "A",
+      "correct_answer": "",(A,B,C....)
       "explanation": "..."
     }}
   ]
@@ -119,6 +120,8 @@ Output format (JSON):
             }]
         }
 
+def format_checker():
+    return
 
 # print(generate_quiz_from_text("I pledge allegiance to the Flag of the United States of America, and to the Republic for which it stands, one Nation under God, indivisible, with liberty and justice for all"))
 # print(generate_quiz_from_text("I live in a house near the mountains. I have two brothers and one sister, and I was born last. My father teaches mathematics, and my mother is a nurse at a big hospital. My brothers are very smart and work hard in school. My sister is a nervous girl, but she is very kind. My grandmother also lives with us. She came from Italy when I was two years old. She has grown old, but she is still very strong. She cooks the best food!"))

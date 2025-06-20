@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Review: {{ quiz.title }}</h2>
+    <p><strong>Student:</strong> {{ student.name }}</p>
+
+    {% for resp in responses %}
+    <div class="card my-3">
+        <div class="card-header">
+            <strong>Question:</strong> {{ resp.question }}
+            <br>
+            <ul class="list-group mt-2">
+                {% set letter_map = ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                {% for opt in resp.options %}
+                    {% set letter = letter_map[loop.index0] %}
+                        {{ letter }} {{ opt.option_text }}<br>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="card-body">
+            <p><strong>Student Answer:</strong> {{ resp.selected or "No answer" }}</p>
+            <p><strong>Correct Answer:</strong> {{ resp.correct or "NONE ON CREATION" }}</p>
+            <p>
+                <strong>Status:</strong>
+                {% if resp.is_correct %}
+                    <span class="text-success">Correct</span>
+                {% else %}
+                    <span class="text-danger">Incorrect</span>
+                {% endif %}
+            </p>
+            {% if resp.explanation %}
+                <p><em>Explanation:</em> {{ resp.explanation }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

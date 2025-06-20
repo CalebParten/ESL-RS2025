@@ -3,42 +3,70 @@
 <div class="container mt-5">
     <h2>My Quizzes</h2>
 
-    {% for quiz in quizzes %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>{{ quiz.title }}</h4>
-            <p><strong>Type:</strong> {{ quiz.quiz_type }} | <strong>Level:</strong> {{ quiz.difficulty_level }}</p>
-            <p>{{ quiz.description }}</p>
-            {% if quiz.source_image_path %}
-            <img src="{{ url_for('static', filename=quiz.source_image_path) }}" alt="Quiz Image" class="img-fluid mt-2">
-            {% elif quiz.source_content %}
-            <p>{{ quiz.source_content }}</p>
-            {% else %}
-            <p>No content available.</p>
-            {% endif %} 
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Level</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quiz in quizzes %}
+            <tr data-bs-toggle="collapse" data-bs-target="#quizDetails{{ quiz.id }}" class="accordion-toggle" style="cursor: pointer;">
+                <td>{{ quiz.title }}</td>
+                <td>{{ quiz.quiz_type }}</td>
+                <td>{{ quiz.difficulty_level }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('main.delete_quiz', quiz_id=quiz.id) }}" onsubmit="return confirm('Delete this quiz?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" class="hiddenRow">
+                    <div class="collapse" id="quizDetails{{ quiz.id }}">
+                        <div class="card card-body">
+                            <p><strong>Description:</strong> {{ quiz.description }}</p>
 
-        </div>
-        <div class="card-body">
-            {% for question in quiz.questions %}
-            <div class="mb-3">
-                <strong>Q{{ loop.index }}:</strong> {{ question.question_text }}
-                <ul class="list-group mt-2">
-                    {% for option in question.options %}
-                    <li class="list-group-item {% if option.is_correct %}list-group-item-success{% endif %}">
-                        {{ option.option_text }}
-                        {% if option.is_correct %}<span class="badge bg-success">Correct</span>{% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% if question.explanation %}
-                <div class="mt-2"><em>Explanation:</em> {{ question.explanation }}</div>
-                {% endif %}
-            </div>
-            <hr>
+                            {% if quiz.source_image_path %}
+                                <img src="{{ url_for('static', filename=quiz.source_image_path) }}" alt="Quiz Image" class="img-fluid mt-2 mb-2">
+                            {% elif quiz.source_content %}
+                                <p><strong>Source:</strong> {{ quiz.source_content }}</p>
+                            {% else %}
+                                <p>No content available.</p>
+                            {% endif %}
+
+                            <hr>
+                            {% for question in quiz.questions %}
+                            <div class="mb-3">
+                                <strong>Q{{ loop.index }}:</strong> {{ question.question_text }}
+                                <ul class="list-group mt-2">
+                                    {% set letter_map = ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                                    {% for option in question.options %}
+                                        {% set letter = letter_map[loop.index0] %}
+                                        {% set is_correct = letter == question.correct_answer %}
+                                        <li class="list-group-item {% if is_correct %}list-group-item-success{% endif %}">
+                                            {{ letter }} {{ option.option_text }}
+                                            {% if is_correct %}
+                                                <span class="badge bg-success">Correct</span>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                {% if question.explanation %}
+                                <div class="mt-2"><em>Explanation:</em> {{ question.explanation }}</div>
+                                {% endif %}
+                            </div>
+                            <hr>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </td>
+            </tr>
             {% endfor %}
-        </div>
-    </div>
-    {% endfor %}
-
+        </tbody>
+    </table>
 </div>
 {% endblock %}

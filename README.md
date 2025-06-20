@@ -34,3 +34,13 @@ Visit http://localhost:5000 to see your app!
 - Responsive web interface
 
 Ready for Week 2: GenAI integration with LangGraph!
+
+
+
+
+Add veiw for student to reveiw past attempts
+add num questions and asnwers for quiz gen
+fix delete quiz if taken (dont delete move to history table)
+
+if time
+Points per question in quiz, and compute base on points
