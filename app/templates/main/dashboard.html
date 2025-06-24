@@ -27,6 +27,7 @@
         <div class="card-body">
             <p>Your English Level: <strong>{{ current_user.grade_level.title() if current_user.grade_level else "Not Set" }}</strong></p>
             <a href="{{ url_for('main.view_assigned_quizzes') }}" class="btn btn-secondary">Take Assigned Quizzes</a>
+            <a href="{{ url_for('main.view_attempts') }}" class="btn btn-secondary">View Past Attempts</a>
         </div>
     </div>
 {% endif %}

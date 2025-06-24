@@ -61,35 +61,41 @@ def generate_quiz():
     if not current_user.is_instructor():
         flash('Access denied.')
         return redirect(url_for('main.dashboard'))
-    
-    quiz_type = request.form.get('quiz_type')
-    difficulty = request.form.get('difficulty_level')
+
     title = request.form.get('title')
     description = request.form.get('description', '')
+    difficulty = request.form.get('difficulty_level')
+    num_questions = int(request.form.get('num_questions', 3))
+    num_options = int(request.form.get('num_options', 4))
 
-    source_content = None
-    source_image_path = None
-    source_mime = None
+    file = request.files.get('source_file')
 
-    if not title or not quiz_type or not difficulty:
+    if not title or not difficulty or not file:
         flash('Missing required fields.')
         return redirect(url_for('main.dashboard'))
 
-    if 'text' in request.files and request.files['text'].filename:
-        source_content = request.files['text'].read().decode('utf-8')
-        generated = generate_quiz_from_text(source_content)
-    elif 'image' in request.files and request.files['image'].filename:
-        image_file = request.files['image']
-        image_bytes = image_file.read()
+    mime_type = file.mimetype
+    quiz_type = None
+    source_content = None
+    source_image_path = None
+    source_mime = mime_type
 
-        source_image_path, source_mime = saveImg(image_bytes, image_file.filename)
-        
-        generated = generate_quiz_from_image(image_bytes)
+    if mime_type.startswith("text"):
+        source_content = file.read().decode('utf-8')
+        quiz_type = "comprehension"
+        generated = generate_quiz_from_text(source_content, num_questions, num_options)
+
+    elif mime_type.startswith("image"):
+        image_bytes = file.read()
+        source_image_path, source_mime = saveImg(image_bytes, file.filename)
+        quiz_type = "description"
+        generated = generate_quiz_from_image(image_bytes, num_questions, num_options)
 
     else:
-        flash('No valid input file provided.')
+        flash('Unsupported file type.')
         return redirect(url_for('main.dashboard'))
 
+    # Save quiz to DB
     quiz = Quiz(
         title=title,
         description=description,
@@ -103,6 +109,7 @@ def generate_quiz():
     db.session.add(quiz)
     db.session.commit()
 
+    # Save questions and options
     for q in generated.get('questions', []):
         question = Question(
             question_text=q['question'],
@@ -139,7 +146,7 @@ def my_quizzes():
         flash('Access denied.')
         return redirect(url_for('main.dashboard'))
 
-    quizzes = current_user.created_quizzes.order_by(Quiz.created_at.desc()).all()
+    quizzes = Quiz.query.filter_by(creator=current_user, is_active=True).all()
     return render_template('main/my_quizzes.html', title='My Quizzes', quizzes=quizzes)
 
 @bp.route('/assign_quiz', methods=['GET', 'POST'])
@@ -149,7 +156,7 @@ def assign_quiz():
         flash('Access denied.')
         return redirect(url_for('main.dashboard'))
 
-    quizzes = current_user.created_quizzes.all()
+    quizzes = Quiz.query.filter_by(creator=current_user, is_active=True).all()
     students = User.query.filter_by(role='student').order_by(User.name).all()
 
     if request.method == 'POST':
@@ -355,10 +362,13 @@ def review_attempt(attempt_id):
 @login_required
 def delete_quiz(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
+
     if quiz.creator != current_user:
         return "Unauthorized", 403
-    db.session.delete(quiz)
+
+    quiz.is_active = False
     db.session.commit()
+
     return redirect(url_for('main.my_quizzes'))
 
 @bp.route('/quiz/<int:quiz_id>/attempts', methods=['GET'])
@@ -393,3 +403,14 @@ def view_assigned_quizzes():
         title='Assigned Quizzes',
         assignments=visible_assignments
     )
+
+@bp.route('/view_attempts')
+@login_required
+def view_attempts():
+    if not current_user.is_student():
+        flash("Only students can view their attempts.")
+        return redirect(url_for('main.dashboard'))
+
+    attempts = QuizAttempt.query.filter_by(student_id=current_user.id, is_completed=True).order_by(QuizAttempt.time_completed.desc()).all()
+
+    return render_template('main/view_attempts.html', attempts=attempts)

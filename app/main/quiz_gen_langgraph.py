@@ -7,18 +7,25 @@ import base64
 # Extract JSON substring from the output
 def extract_json(text):
     try:
-        # Greedily match a JSON object
-        match = re.search(r'\{[\s\S]*\}', text)
-        if match:
-            return json.loads(match.group())
-    except json.JSONDecodeError:
-        pass
+        code_block_match = re.search(r"```json\n([\s\S]+?)```", text)
+        if code_block_match:
+            json_part = code_block_match.group(1).strip()
+            return json.loads(json_part)
+
+        json_match = re.search(r'\{[\s\S]*\}', text)
+        if json_match:
+            return json.loads(json_match.group())
+    except json.JSONDecodeError as e:
+        print("JSON decode error:", e)
     return None
 
-def generate_quiz_from_text(text):
+def generate_quiz_from_text(text, num_questions=3, num_options=4):
+    option_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'][:num_options]
+    formatted_options = ', '.join(option_letters)
+
     prompt = f"""
-You are a quiz generator AI. Read the following passage and generate 3 multiple-choice comprehension questions.
-Each question should have 4 options (A, B, C, D), a correct answer, and a brief explanation.
+You are a quiz generator AI. Read the following passage and generate {num_questions} multiple-choice comprehension questions.
+Each question should have {num_options} options labeled {formatted_options}.
 Return only a JSON object in this exact structure:
 
 Text:
@@ -29,8 +36,8 @@ Output format (JSON):
   "questions": [
     {{
       "question": "...",
-      "options": ["QuestionAnswer1", "QuestionAnswer2", "QuestionAnswer3", "QuestionAnswer4"],
-      "correct_answer": "",(A,B,C....)
+      "options": ["Option1", "Option2", "Option3", "..."],
+      "correct_answer": "",  // Use letter like "A", "B", etc.
       "explanation": "..."
     }}
   ]
@@ -45,31 +52,25 @@ Output format (JSON):
     )
 
     output = result.stdout.strip()
-
     quiz_data = extract_json(output)
 
     if quiz_data:
         return quiz_data
     else:
-        return {
-            "questions": [{
-                "question": "Error generating questions.",
-                "options": [],
-                "correct_answer": "",
-                "explanation": output  # Show full output for debugging
-            }]
-        }
+        return format_checker(output)
 
 
 
-def generate_quiz_from_image(image_bytes):
+
+def generate_quiz_from_image(image_bytes, num_questions=3, num_options=4):
     try:
-        # Encode image to base64
         image_b64 = base64.b64encode(image_bytes).decode('utf-8')
+        option_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'][:num_options]
+        formatted_options = ', '.join(option_letters)
 
         prompt = f"""
-You are an educational assistant. Look at the image and generate 3 multiple-choice questions about its contents.
-Each question should test visual comprehension.
+You are an educational assistant. Look at the image and generate {num_questions} multiple-choice questions about its contents.
+Each question should have {num_options} answer choices labeled {formatted_options}, a correct letter (e.g. "A", "B"), and a short explanation.
 Return only a JSON object in this exact structure:
 
 Output format (JSON):
@@ -77,13 +78,14 @@ Output format (JSON):
   "questions": [
     {{
       "question": "...",
-      "options": ["QuestionAnswer1", "QuestionAnswer2", "QuestionAnswer3", "QuestionAnswer4"],
-      "correct_answer": "",(A,B,C....)
+      "options": ["Option1", "Option2", "Option3", "..."],
+      "correct_answer": "",  // Use letter like "A", "B", etc.
       "explanation": "..."
     }}
   ]
 }}
 """
+
         response = ollama.chat(
             model='llama3.2-vision',
             messages=[
@@ -101,14 +103,7 @@ Output format (JSON):
         if quiz_data:
             return quiz_data
         else:
-            return {
-                "questions": [{
-                    "question": "Error generating image-based questions.",
-                    "options": [],
-                    "correct_answer": "",
-                    "explanation": output  # Helpful for debugging
-                }]
-            }
+            return format_checker(output)
 
     except Exception as e:
         return {
@@ -120,8 +115,48 @@ Output format (JSON):
             }]
         }
 
-def format_checker():
-    return
 
-# print(generate_quiz_from_text("I pledge allegiance to the Flag of the United States of America, and to the Republic for which it stands, one Nation under God, indivisible, with liberty and justice for all"))
-# print(generate_quiz_from_text("I live in a house near the mountains. I have two brothers and one sister, and I was born last. My father teaches mathematics, and my mother is a nurse at a big hospital. My brothers are very smart and work hard in school. My sister is a nervous girl, but she is very kind. My grandmother also lives with us. She came from Italy when I was two years old. She has grown old, but she is still very strong. She cooks the best food!"))
+def format_checker(bad_output, max_attempts=5):
+
+    for attempt in range(max_attempts):
+        fix_prompt = f"""
+The following is a malformed quiz response that contains question and answer content but is not in valid JSON format.
+
+Please fix it so that it is a *valid JSON object*, matching the following structure, and output ONLY the JSON in a Python-style markdown code block (using triple backticks):
+
+```json
+{{
+  "questions": [
+    {{
+      "question": "What color is the sky?",
+      "options": ["A", "B", "C", "D"],
+      "correct_answer": "A",
+      "explanation": "Sky is blue due to Rayleigh scattering."
+    }}
+  ]
+}}
+```
+
+Here is the input to fix:
+{bad_output}
+"""
+
+        try:
+            result = ollama.chat(
+                model='llama3.2',
+                messages=[{'role': 'user', 'content': fix_prompt}]
+            )
+            corrected = result['message']['content']
+            corrected = extract_json(corrected)
+            return json.loads(corrected)
+        except Exception:
+            continue
+
+    return {
+        "questions": [{
+            "question": "Error after multiple attempts to fix malformed JSON.",
+            "options": [],
+            "correct_answer": "",
+            "explanation": bad_output
+        }]
+    }

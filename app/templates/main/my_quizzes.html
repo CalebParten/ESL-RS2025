@@ -43,7 +43,7 @@
                             <div class="mb-3">
                                 <strong>Q{{ loop.index }}:</strong> {{ question.question_text }}
                                 <ul class="list-group mt-2">
-                                    {% set letter_map = ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                                    {% set letter_map = ['A', 'B', 'C', 'D', 'E', 'F', 'G'] %}
                                     {% for option in question.options %}
                                         {% set letter = letter_map[loop.index0] %}
                                         {% set is_correct = letter == question.correct_answer %}
