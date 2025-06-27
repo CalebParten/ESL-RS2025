@@ -27,20 +27,5 @@ python run.py
 
 Visit http://localhost:5000 to see your app!
 
-## Week 1 Features ✅
-- User authentication (students & instructors)
-- Role-based access control
-- Database schema ready for quiz generation
-- Responsive web interface
-
-Ready for Week 2: GenAI integration with LangGraph!
-
-
-
-
-Add veiw for student to reveiw past attempts
-add num questions and asnwers for quiz gen
-fix delete quiz if taken (dont delete move to history table)
-
-if time
-Points per question in quiz, and compute base on points
+## Next Steps
+Next steps will be to Improve the grading system as well as making the due dates function. Another thing we should look at adding is both password changes and instructor account creation approval.
